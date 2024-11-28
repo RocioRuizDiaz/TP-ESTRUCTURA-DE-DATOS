@@ -1,71 +1,135 @@
+# Importamos las librerías necesarias
 import networkx as nx
 import matplotlib.pyplot as plt
-import numpy as np
 import random
 
-# Puntos de información
+
+# 1. CREACIÓN DEL GRAFO DIRIGIDO (DAG)**
+
+
+# Lista de hospitales (nodos)
 hospitales = ['Hospital A', 'Hospital B', 'Hospital C', 'Hospital D', 'Hospital E']
+
+# Lista de distancias entre hospitales (aristas dirigidas con pesos aleatorios)
+random.seed(42)  # Usamos una semilla para generar valores consistentes
 distancias = [
-    {'de': 'Hospital A', 'a': 'Hospital B', 'peso': random.random()}, 
-    {'de': 'Hospital B', 'a': 'Hospital C', 'peso': random.random()},
-    {'de': 'Hospital C', 'a': 'Hospital D', 'peso': random.random()},
-    {'de': 'Hospital D', 'a': 'Hospital E', 'peso': random.random()},
+    {'de': 'Hospital A', 'a': 'Hospital B', 'peso': random.uniform(1, 10)}, 
+    {'de': 'Hospital B', 'a': 'Hospital C', 'peso': random.uniform(1, 10)},
+    {'de': 'Hospital C', 'a': 'Hospital D', 'peso': random.uniform(1, 10)},
+    {'de': 'Hospital D', 'a': 'Hospital E', 'peso': random.uniform(1, 10)},
 ]
 
-# Crear el grafo
-Grafo = nx.Graph()
+# Creamos el grafo dirigido
+Grafo_Hospitales = nx.DiGraph()
 
-# Agregar nodos (hospitales)
+# Agregamos los nodos (hospitales)
 for hospital in hospitales:
-    Grafo.add_node(hospital)
+    Grafo_Hospitales.add_node(hospital)
 
-# Agregar aristas (distancias)
+# Agregamos las aristas (con pesos)
 for distancia in distancias:
-    Grafo.add_edge(
+    Grafo_Hospitales.add_edge(
         distancia['de'], 
         distancia['a'], 
         peso=distancia['peso']
     )
 
-# Punto 2: Recorridos DFS y BFS para encontrar el camino más corto
-def encontrar_camino_corto(grafo, origen, destino):
-    try:
-        # Buscar el camino más corto usando BFS
-        camino_bfs = nx.bfs_shortest_path(grafo, origen, target=destino)
-        return camino_bfs
-    except nx.NetworkXNoPath:
-        print("No se encontró un camino BFS.")
-    
-    try:
-        # Buscar el camino más corto usando DFS
-        camino_dfs = nx.dfs_predecessors(grafo, origen)
-        # Necesitas un recorrido más elaborado si quieres camino completo
-        return camino_dfs
-    except nx.NetworkXNoPath:
-        print("No se encontró un camino DFS.")
-    return None
 
-# Punto 3: Ordenamiento topológico para diagnosticar enfermedades
-def diagnosticar_enfermedad(sintomas):
+# 2. CREACIÓN DEL GRAFO PARA DIAGNÓSTICOS**
+
+
+# Creamos un grafo dirigido para diagnosticar enfermedades
+Grafo_Diagnostico = nx.DiGraph()
+Grafo_Diagnostico.add_edges_from([
+    ('Fiebre', 'Infección'),
+    ('Infección', 'Tratamiento'),
+    ('Dolor de cabeza', 'Fiebre'),
+    ('Tratamiento', 'Recuperación')
+])
+
+
+# 3. FUNCIONES DE DIAGNÓSTICO Y ORDEN TOPOLOGICO**
+
+def diagnosticar_enfermedad(grafo):
+    """
+    Realiza un diagnóstico basado en un orden topológico de síntomas y tratamientos.
+    Este método funciona solo en grafos dirigidos y acíclicos (DAG).
+    """
     try:
         # Asegúrate de que el grafo sea un DAG
-        secuencia_diagnosticar = nx.topological_sort(Grafo)
+        if not nx.is_directed_acyclic_graph(grafo):
+            print("El grafo no es un DAG (Grafo Dirigido Acíclico).")
+            return None
+        secuencia_diagnosticar = nx.topological_sort(grafo)
         return list(secuencia_diagnosticar)
-    except nx.NetworkXError:
-        print("El grafo no es un DAG (Grafe Dirigido Acíclico).")
-
-# Punto 4: Problema NP y algoritmo de Dijkstra
-def encontrar_camino_mejor_ambulancia(grafo, origen, objetivo): 
-    try:
-        # Encontrar el camino mínimo usando el algoritmo de Dijkstra
-        camino_minimo = nx.dijkstra_path(grafo, source=origen, target=objetivo, weight='peso')
-        return camino_minimo
-    except nx.NetworkXNoPath:
-        print(f"No se encontró un camino entre {origen} y {objetivo}.")
+    except nx.NetworkXError as e:
+        print(f"Error durante el ordenamiento topológico: {e}")
         return None
 
-# Graficar el grafo
-pos = nx.spring_layout(Grafo)  # Layout para posicionar los nodos
-nx.draw(Grafo, pos, with_labels=True, font_weight='bold', node_color='skyblue', node_size=3000, font_size=12)
-plt.axis('off')
-plt.show()
+
+# 4. FUNCIONES DE CAMINOS EN DAG**
+
+
+def encontrar_camino_dijkstra(grafo, origen, destino):
+    """
+    Encuentra el camino más corto en términos de peso usando Dijkstra.
+    """
+    try:
+        return nx.dijkstra_path(grafo, origen, destino, weight='peso')
+    except nx.NetworkXNoPath:
+        print(f"No se encontró un camino usando Dijkstra entre {origen} y {destino}.")
+        return None
+
+def comparar_caminos(grafo, origen, destino):
+    """
+    Compara los resultados del camino más corto (Dijkstra) y el orden topológico.
+    """
+    if origen not in grafo.nodes or destino not in grafo.nodes:
+        print(f"Uno o ambos hospitales ({origen}, {destino}) no existen en el grafo.")
+        return None
+    
+    resultados = {
+        'Dijkstra': encontrar_camino_dijkstra(grafo, origen, destino),
+        'Orden Topológico': orden_topologico(grafo)
+    }
+    return resultados
+
+def orden_topologico(grafo):
+    """
+    Realiza el ordenamiento topológico del grafo dirigido.
+    """
+    try:
+        return list(nx.topological_sort(grafo))
+    except nx.NetworkXError as e:
+        print(f"Error durante el ordenamiento topológico: {e}")
+        return None
+
+# ------------------------------
+# **5. VISUALIZACIÓN DE LOS GRAFOS**
+# ------------------------------
+
+def visualizar_grafo(grafo, origen=None, destino=None, titulo="Grafo"):
+    """
+    Muestra el grafo con nodos y aristas, incluyendo pesos.
+    """
+    pos = nx.spring_layout(grafo)  # Genera posiciones para los nodos
+    etiquetas_pesos = nx.get_edge_attributes(grafo, 'peso')
+    
+    # Colores: origen en verde, destino en rojo, otros en azul
+    colores = ['green' if nodo == origen else 
+               'red' if nodo == destino else 
+               'skyblue' for nodo in grafo.nodes]
+    
+    # Dibujamos el grafo
+    nx.draw(grafo, pos, with_labels=True, node_color=colores, node_size=3000, font_size=10, arrows=True)
+    nx.draw_networkx_edge_labels(grafo, pos, edge_labels=etiquetas_pesos)
+    plt.title(titulo)
+    plt.axis('off')
+    plt.show()
+
+
+
+
+#Análisis de Algoritmos (Unidad 6): Analiza la eficiencia de los algoritmos utilizados 
+# (inserción en árbol binario, recorrido en árbol general, búsqueda en cola de prioridad) 
+# en términos de tiempo y espacio. Asegúrate de explicar la complejidad de cada uno.

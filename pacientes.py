@@ -1,6 +1,7 @@
 from datetime import datetime
 from gestion_de_arboles import EventoClinico
 
+
 class Paciente:
     """
     Crea un paciente con su informacion basica y su hitorial clinico
@@ -48,7 +49,7 @@ class Paciente:
         self.agregar_evento_clinico(tratamiento)
         
 
-# 2- Algoritmos recursivos
+# 2- ALGORITMOS RECURSIVOS
     def buscar_en_el_historial(self,clave):
          """
          Busca los eventos clínicos clave el en hitorial del paciente.
