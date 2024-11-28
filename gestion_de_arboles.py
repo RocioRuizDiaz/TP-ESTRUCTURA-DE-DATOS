@@ -153,3 +153,200 @@ arbol.insertar(10, "Quimey Torres")
 # Mostrar los pacientes en orden
 print("Pacientes en el árbol:")
 print(arbol)
+
+#se podria implementar Panda para graficos?
+
+#Codigo de mi compañero
+#Arboles Generales  
+# falta implementar codigo completo, 
+# unidad de 6 al 10 en progero del otro compañero)
+4# Árboles Generales (Unidad 4):
+
+#aca represento una clase donde cada nodoevento es un evento medico(consulta, diagnostico y tratamiento) 
+class NodoEvento:
+    def __init__(self, evento):
+      self.evento = evento # con esto defino el evento y despues sus ramas (que pueden ser fechas, tipo, etc)
+      self.hijos=[] #con esta variable puedo añadir hijos a culaquier nodo que yo quiera. 
+    
+    def agregar_hijo(self, nodo_hijo):
+        self.hijos.append(nodo_hijo) #con esto puedo agregar mas nodos a cualquiera q yo quiera.
+        
+        
+class ArbolHistorialClinico:
+    def __init__(self, nodo_raiz= None):
+        self.nodo_raiz = nodo_raiz # el nodo raiz representa la primera visita del paciente
+         
+    def agregar_nodos_eventos(self,nodo_padre,nuevo_evento): 
+        if self.nodo_raiz is None: # aca pregunto si la raiz esta vacia , nodo_raiz seré nuevo_evento
+            self.nodo_raiz = nuevo_evento
+            
+        else:        
+              nodo_padre.agregar_hijo(nuevo_evento) #aca le digo, de lo contrario si la raiz no esta vacia
+              # se va a insertar el nodo_hijo y no en la raiz.
+              
+    def recorrer_arbol_profundidad(self,nodo): #aqui creo un metodo para visualizar el arbol y recorrer el historial clinico. 
+        if nodo: #aca comprobamos si el nodo no es none , si es none, el recorrido no continua. 
+            print(nodo.evento) #aca imprimo el valor del nodo actual
+            #recorre todos los hijos del nodo actual
+            for hijo in nodo.hijos:
+                #llama recursivamente a la funcion para cada hijo
+                self.recorrer_arbol_profundidad(hijo)
+                
+    def recorrer_arbol_nivel(self): #con este metodo exploramos cada nivel antes de pasar al siguiente
+         if not self.nodo_raiz: # Verificamos si el nodo raíz está vacío. Si es None, el recorrido no continúa.     
+           cola = [self.nodo_raiz] #aca creamos una var (cola)para almacenar los nodos que vamos a visitar
+           #en este caso inicializamos con el nodo_raiz..
+           cola = [self.nodo_raiz] 
+           while cola: nodo_actual = cola.pop(0)#Mientras la cola no esté vacía, extraemos el primer nodo (nodo actual).
+           print(nodo_actual.evento)#e imprimimos 
+           cola.extend(nodo_actual.hijos)#Después de procesar el nodo actual, agregamos sus hijos a la cola 
+           #para ser procesados en el orden en que fueron añadidos.
+
+#aca instanciamos y definimos los eventos medicos           
+consulta_inicial = NodoEvento("Consulta Inicial") 
+diagnostico = NodoEvento("Diagnóstico: Diabetes") 
+tratamiento1 = NodoEvento("Tratamiento: Insulina") 
+seguimiento1 = NodoEvento("Seguimiento: Revisión de glucosa") 
+tratamiento2 = NodoEvento("Tratamiento: Ajuste de insulina") 
+  # aca creamos  el árbol de historial clínico y establezco  el nodo raíz 
+historial_clinico = ArbolHistorialClinico(consulta_inicial)  
+historial_clinico.agregar_evento(consulta_inicial, diagnostico) 
+historial_clinico.agregar_evento(diagnostico, tratamiento1) 
+historial_clinico.agregar_evento(tratamiento1, seguimiento1) 
+historial_clinico.agregar_evento(seguimiento1, tratamiento2)
+#aca imprimimos
+print(historial_clinico.recorrer_arbol_profundidad(historial_clinico.nodo_raiz))
+
+
+#5 Cola de Prioridades y Heap Binaria (Unidad 5):
+
+
+class Paciente:
+    def __init__(self, nombre,gravedad):#implemente una clase paciente que indica el nombre y la gravedad
+        self.nombre = nombre
+        self.gravedad = gravedad
+    
+import heapq #aca implemento el modulo heapq para manipular las colas de prioridad(urgencias)
+class ColaPrioridades:
+    def __init__(self):
+        self.co0la = [] #aca almaceno en una lista las colas.
+        
+    def agregar_pacientes(self, paciente):
+        #use una tupla gravedad, paciente para que el heap pueda ordenar por gravedad
+       heapq.heappush(self.cola, (paciente.gravedad, paciente.nombre))  
+        #con la funcion heapq.heappush Inserto un ítem en el heap manteniendo la propiedad de heap,
+        # el menor o mayor elemento siempre en la raíz según el tipo de heap 
+    def extraer_pacientes(self,): 
+        # Extraemos la tupla (gravedad, nombre), y retornamos solo el nombre del paciente.
+        nombre = heapq.heappop(self.cola)# con heappop nos permite Eliminar y devuelver el menor 
+        #elemento del heap.nos permite extraer el elemento de mayor prioridad de la cola
+        # de prioridades. 
+        return nombre
+    
+    
+# Creamos las instancias de los pacientes con su gravedad.
+ 
+paciente1 = Paciente("Juan", 5) # Gravedad 5 
+paciente2 = Paciente("Ana", 8) # Gravedad 8 
+paciente3 = Paciente("Luis", 3) # Gravedad 3 
+
+# Crear la cola de prioridades 
+cola_prioridad = ColaPrioridades() 
+
+# Agregar pacientes a la cola 
+cola_prioridad.agregar_pacientes(paciente1) 
+cola_prioridad.agregar_pacientes(paciente2) 
+cola_prioridad.agregar_pacientes(paciente3) 
+
+# Atender pacientes en orden de gravedad 
+print(f"Paciente atendido: {cola_prioridad.atender_paciente()}")# en este caso imprime a Ana con gravedad 8(alta)
+print(f"Paciente atendido: {cola_prioridad.atender_paciente()}") #a Juan que tiene gravedad 5 
+print(f"Paciente atendido: {cola_prioridad.atender_paciente()}") # y a luis que tiene la mas baja de 3
+
+
+#Análisis de Algoritmos (Unidad 6): Analiza la eficiencia de los algoritmos utilizados 
+# (inserción en árbol binario, recorrido en árbol general, búsqueda en cola de prioridad) 
+# en términos de tiempo y espacio. Asegúrate de explicar la complejidad de cada uno.
+
+""""
+Unidad 4: Árboles Generales
+Algoritmo de Inserción de Nodos
+Complejidad Temporal:
+
+Inserción: 𝑂(1)
+
+Cada vez que se agrega un nodo hijo a un nodo específico, simplemente se añade a la lista 
+de hijos de ese nodo. Esta operación es constante en tiempo ya que no requiere recorrer el árbol.
+
+Complejidad Espacial:
+
+Espacio Adicional: 𝑂(1)
+
+La inserción de un nodo requiere espacio adicional constante para almacenar 
+la referencia del nuevo nodo hijo.
+
+Algoritmos de Recorrido (DFS y BFS)
+Recorrido en Profundidad (DFS)
+
+Complejidad Temporal:
+
+DFS: 𝑂(𝑛)
+Donde 
+𝑛
+es el número total de nodos en el árbol. El DFS visita cada nodo una vez, resultando en una complejidad lineal.
+
+Complejidad Espacial:
+
+DFS: 𝑂(ℎ)
+
+Donde ℎ
+es la altura del árbol. La pila de recursión puede llegar a tener una profundidad
+igual a la altura del árbol.
+
+Recorrido en Amplitud (BFS)
+
+Complejidad Temporal:
+
+BFS: 𝑂(𝑛)
+
+Al igual que el DFS, el BFS también visita cada nodo una vez, resultando en una complejidad lineal.
+
+Complejidad Espacial:
+
+BFS: 𝑂(𝑤)
+
+Donde 𝑤
+es el ancho máximo del árbol. En el peor caso, la cola puede contener todos
+los nodos en el nivel más amplio del árbol.
+
+Unidad 5: Cola de Prioridades y Heap Binaria
+Algoritmo de Inserción en Cola de Prioridades (Heap Binario)
+Complejidad Temporal:
+
+Inserción: 𝑂(log𝑛)
+
+Insertar un elemento en un heap binario requiere ajustar la posición 
+del nuevo elemento para mantener la propiedad del heap, lo cual toma tiempo logarítmico en el número de elementos.
+
+Complejidad Espacial:
+
+Espacio Adicional: 𝑂(1)
+
+No se requiere espacio adicional significativo aparte del almacenamiento del nuevo elemento en el heap.
+
+Algoritmo de Extracción en Cola de Prioridades (Heap Binario)
+Complejidad Temporal:
+
+Extracción del máximo/mínimo: 𝑂(log𝑛)
+
+Extraer el elemento de mayor prioridad y ajustar el heap también requiere tiempo logarítmico 
+en el número de elementos.
+
+Complejidad Espacial:
+
+Espacio Adicional: 𝑂(1)
+
+Similar a la inserción, no se requiere espacio adicional significativo aparte de los elementos en el heap.
+"""""
+
+
